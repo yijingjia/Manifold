@@ -26,28 +26,43 @@ int Model_OBJ::Load(char* filename)
 	return 0;
 }
  
+// void Model_OBJ::Calc_Bounding_Box()
+// {
+// 	min_corner = glm::dvec3(1e30,1e30,1e30);
+// 	max_corner = -min_corner;
+// 	for (int i = 0; i < (int)vertices.size(); ++i)
+// 	{
+// 		for (int j = 0; j < 3; ++j)
+// 		{
+// 			if (vertices[i][j] < min_corner[j])
+// 			{
+// 				min_corner[j] = vertices[i][j];
+// 			}
+// 			if (vertices[i][j] > max_corner[j])
+// 			{
+// 				max_corner[j] = vertices[i][j];
+// 			}
+// 		}
+// 	}
+// 	glm::dvec3 length = max_corner - min_corner;
+// 	min_corner -= length * 0.2;
+// 	max_corner += length * 0.2;
+// }
+
 void Model_OBJ::Calc_Bounding_Box()
 {
-	min_corner = glm::dvec3(1e30,1e30,1e30);
-	max_corner = -min_corner;
-	for (int i = 0; i < (int)vertices.size(); ++i)
-	{
-		for (int j = 0; j < 3; ++j)
-		{
-			if (vertices[i][j] < min_corner[j])
-			{
-				min_corner[j] = vertices[i][j];
-			}
-			if (vertices[i][j] > max_corner[j])
-			{
-				max_corner[j] = vertices[i][j];
-			}
-		}
-	}
-	glm::dvec3 length = max_corner - min_corner;
-	min_corner -= length * 0.2;
-	max_corner += length * 0.2;
+    min_corner = glm::dvec3(1e30, 1e30, 1e30);
+    max_corner = -min_corner;
+    for (const auto& vertex : vertices)
+    {
+        min_corner = glm::min(min_corner, vertex);
+        max_corner = glm::max(max_corner, vertex);
+    }
+    glm::dvec3 length = max_corner - min_corner;
+    min_corner -= length * 0.2;
+    max_corner += length * 0.2;
 }
+
 
 void Model_OBJ::Build_Tree(int resolution)
 {
@@ -85,102 +100,153 @@ void Model_OBJ::Build_Tree(int resolution)
 	}
 }
 
-glm::dvec3 Model_OBJ::Closest_Point( const glm::dvec3 *triangle, const glm::dvec3 &sourcePosition )
+// glm::dvec3 Model_OBJ::Closest_Point( const glm::dvec3 *triangle, const glm::dvec3 &sourcePosition )
+// {
+//     glm::dvec3 edge0 = triangle[1] - triangle[0];
+//     glm::dvec3 edge1 = triangle[2] - triangle[0];
+//     glm::dvec3 v0 = triangle[0] - sourcePosition;
+
+//     double a = glm::dot(edge0, edge0 );
+//     double b = glm::dot(edge0, edge1 );
+//     double c = glm::dot(edge1, edge1 );
+//     double d = glm::dot(edge0, v0 );
+//     double e = glm::dot(edge1, v0 );
+
+//     double det = a*c - b*b;
+//     double s = b*e - c*d;
+//     double t = b*d - a*e;
+
+//     if ( s + t < det )
+//     {
+//         if ( s < 0.f )
+//         {
+//             if ( t < 0.f )
+//             {
+//                 if ( d < 0.f )
+//                 {
+//                     s = clamp( -d/a, 0.f, 1.f );
+//                     t = 0.f;
+//                 }
+//                 else
+//                 {
+//                     s = 0.f;
+//                     t = clamp( -e/c, 0.f, 1.f );
+//                 }
+//             }
+//             else
+//             {
+//                 s = 0.f;
+//                 t = clamp( -e/c, 0.f, 1.f );
+//             }
+//         }
+//         else if ( t < 0.f )
+//         {
+//             s = clamp( -d/a, 0.f, 1.f );
+//             t = 0.f;
+//         }
+//         else
+//         {
+//             float invDet = 1.f / det;
+//             s *= invDet;
+//             t *= invDet;
+//         }
+//     }
+//     else
+//     {
+//         if ( s < 0.f )
+//         {
+//             float tmp0 = b+d;
+//             float tmp1 = c+e;
+//             if ( tmp1 > tmp0 )
+//             {
+//                 float numer = tmp1 - tmp0;
+//                 float denom = a-2*b+c;
+//                 s = clamp( numer/denom, 0.f, 1.f );
+//                 t = 1-s;
+//             }
+//             else
+//             {
+//                 t = clamp( -e/c, 0.f, 1.f );
+//                 s = 0.f;
+//             }
+//         }
+//         else if ( t < 0.f )
+//         {
+//             if ( a+d > b+e )
+//             {
+//                 float numer = c+e-b-d;
+//                 float denom = a-2*b+c;
+//                 s = clamp( numer/denom, 0.f, 1.f );
+//                 t = 1-s;
+//             }
+//             else
+//             {
+//                 s = clamp( -e/c, 0.f, 1.f );
+//                 t = 0.f;
+//             }
+//         }
+//         else
+//         {
+//             float numer = c+e-b-d;
+//             float denom = a-2*b+c;
+//             s = clamp( numer/denom, 0.f, 1.f );
+//             t = 1.f - s;
+//         }
+//     }
+
+//     return triangle[0] + s * edge0 + t * edge1;
+// }
+
+glm::dvec3 Model_OBJ::Closest_Point(const glm::dvec3* triangle, const glm::dvec3& sourcePosition)
 {
     glm::dvec3 edge0 = triangle[1] - triangle[0];
     glm::dvec3 edge1 = triangle[2] - triangle[0];
     glm::dvec3 v0 = triangle[0] - sourcePosition;
 
-    double a = glm::dot(edge0, edge0 );
-    double b = glm::dot(edge0, edge1 );
-    double c = glm::dot(edge1, edge1 );
-    double d = glm::dot(edge0, v0 );
-    double e = glm::dot(edge1, v0 );
+    double a = glm::dot(edge0, edge0);
+    double b = glm::dot(edge0, edge1);
+    double c = glm::dot(edge1, edge1);
+    double d = glm::dot(edge0, v0);
+    double e = glm::dot(edge1, v0);
 
-    double det = a*c - b*b;
-    double s = b*e - c*d;
-    double t = b*d - a*e;
+    double det = a * c - b * b;
+    double s = b * e - c * d;
+    double t = b * d - a * e;
 
-    if ( s + t < det )
+    if (s < 0.0)
     {
-        if ( s < 0.f )
+        s = 0.0;
+        t = glm::clamp(-e / c, 0.0, 1.0);
+    }
+    else if (s + t > det)
+    {
+        double tmp0 = b + d;
+        double tmp1 = c + e;
+        if (tmp1 > tmp0)
         {
-            if ( t < 0.f )
-            {
-                if ( d < 0.f )
-                {
-                    s = clamp( -d/a, 0.f, 1.f );
-                    t = 0.f;
-                }
-                else
-                {
-                    s = 0.f;
-                    t = clamp( -e/c, 0.f, 1.f );
-                }
-            }
-            else
-            {
-                s = 0.f;
-                t = clamp( -e/c, 0.f, 1.f );
-            }
-        }
-        else if ( t < 0.f )
-        {
-            s = clamp( -d/a, 0.f, 1.f );
-            t = 0.f;
+            double numer = tmp1 - tmp0;
+            double denom = a - 2.0 * b + c;
+            s = glm::clamp(numer / denom, 0.0, 1.0);
+            t = 1.0 - s;
         }
         else
         {
-            float invDet = 1.f / det;
-            s *= invDet;
-            t *= invDet;
+            t = glm::clamp(-e / c, 0.0, 1.0);
+            s = 0.0;
         }
     }
     else
     {
-        if ( s < 0.f )
-        {
-            float tmp0 = b+d;
-            float tmp1 = c+e;
-            if ( tmp1 > tmp0 )
-            {
-                float numer = tmp1 - tmp0;
-                float denom = a-2*b+c;
-                s = clamp( numer/denom, 0.f, 1.f );
-                t = 1-s;
-            }
-            else
-            {
-                t = clamp( -e/c, 0.f, 1.f );
-                s = 0.f;
-            }
-        }
-        else if ( t < 0.f )
-        {
-            if ( a+d > b+e )
-            {
-                float numer = c+e-b-d;
-                float denom = a-2*b+c;
-                s = clamp( numer/denom, 0.f, 1.f );
-                t = 1-s;
-            }
-            else
-            {
-                s = clamp( -e/c, 0.f, 1.f );
-                t = 0.f;
-            }
-        }
-        else
-        {
-            float numer = c+e-b-d;
-            float denom = a-2*b+c;
-            s = clamp( numer/denom, 0.f, 1.f );
-            t = 1.f - s;
-        }
+        double invDet = 1.0 / det;
+        s *= invDet;
+        t *= invDet;
     }
 
     return triangle[0] + s * edge0 + t * edge1;
 }
+
+
+
 
 void Model_OBJ::Construct_Manifold()
 {

@@ -9,6 +9,9 @@
 #include <map>
 #include "Intersection.h"
 
+#include <tuple>
+
+
 using namespace std;
 
 class Grid_Index
@@ -18,13 +21,20 @@ public:
 	Grid_Index(int x, int y, int z)
 	: id(x,y,z)
 	{}
-	bool operator<(const Grid_Index& ind) const
-	{
-		int i = 0;
-		while (i < 3 && id[i] == ind.id[i])
-			i++;
-		return (i < 3 && id[i] < ind.id[i]);
-	}
+
+	// bool operator<(const Grid_Index& ind) const
+	// {
+	// 	int i = 0;
+	// 	while (i < 3 && id[i] == ind.id[i])
+	// 		i++;
+	// 	return (i < 3 && id[i] < ind.id[i]);
+	// }
+
+    bool operator<(const Grid_Index& ind) const
+    {
+        return std::tie(id[0], id[1], id[2]) < std::tie(ind.id[0], ind.id[1], ind.id[2]);
+    }
+
 	Grid_Index operator+(const Grid_Index& ind) const
 	{
 		Grid_Index grid(*this);
