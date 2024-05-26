@@ -119,7 +119,7 @@ public:
 		if (level == 0)
 			return false;
 		int index = 0;
-		for (int i = 0; i < 3; ++i)
+		for (int i = 0; i < 3; ++i) //todo: the logic might be wrong here
 		{
 			index *= 2;
 			if (p[i] > min_corner[i] + length[i] / 2)
