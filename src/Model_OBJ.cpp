@@ -1090,27 +1090,13 @@ double Model_OBJ::detect_flips() {
     int flipCount = 0;
     int totalFaces = face_indices.size();
 
-    // Check if face_normals has the same size as face_indices
-    if (face_normals.size() != totalFaces) {
-        std::cerr << "Error: face_normals size does not match face_indices size." << std::endl;
-        return -1.0; // Return an invalid ratio indicating an error
-    }
-
-    for (size_t i = 0; i < totalFaces; ++i) {
-        glm::ivec3 face = face_indices[i];
-
-        // Ensure the face indices are within bounds
-        if (face[0] >= vertices.size() || face[1] >= vertices.size() || face[2] >= vertices.size()) {
-            std::cerr << "Error: Face index out of bounds." << std::endl;
-            return -1.0; // Return an invalid ratio indicating an error
-        }
-
+    for (auto& face : face_indices) {
         glm::dvec3 v0 = vertices[face[0]];
         glm::dvec3 v1 = vertices[face[1]];
         glm::dvec3 v2 = vertices[face[2]];
 
         glm::dvec3 normal = glm::normalize(glm::cross(v1 - v0, v2 - v0));
-        glm::dvec3 expectedNormal = face_normals[i];
+        glm::dvec3 expectedNormal = face_normals[&face - &face_indices[0]]; // Assuming face_normals holds the correct normal for comparison
 
         if (glm::dot(normal, expectedNormal) < 0) {
             flipCount++;
