@@ -14,7 +14,6 @@ int main(int argc, char** argv)
   }
   obj.Load(argv[1]);
   double flipRatio_o = obj.detect_flips();
-  std::cout << "Ratio of flipped faces: " << flipRatio_o << std::endl;
 
   if (argc > 3)
   {
@@ -35,7 +34,7 @@ int main(int argc, char** argv)
   Model_OBJ output;
   output.Load(argv[2]);
   double flipRatio = output.detect_flips();
-  std::cout << "Ratio of flipped faces: " << flipRatio - flipRatio_o << std::endl;
+  std::cout << "Ratio of flipped faces: " <<  std::abs(flipRatio - flipRatio_o) << std::endl;
   
   return 0; 
 }
