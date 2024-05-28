@@ -48,6 +48,8 @@ set(
     src/Model_OBJ.cpp
     src/Model_OBJ.h
     src/Octree.h    
+    src/BV.h
+    src/BV.cpp
 )
 
 set(
