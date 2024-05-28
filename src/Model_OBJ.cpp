@@ -1086,23 +1086,39 @@ void Model_OBJ::Save(const char* filename, bool color)
 	cout << min_len << " " << max_len << "\n";
 }
 
+glm::dvec3 calculateNormal(const glm::dvec3& v0, const glm::dvec3& v1, const glm::dvec3& v2) {
+    return glm::normalize(glm::cross(v1 - v0, v2 - v0));
+}
+
 double Model_OBJ::detect_flips() {
     int flipCount = 0;
     int totalFaces = face_indices.size();
+    
+    // Reserve space for face normals
+    face_normals.resize(totalFaces);
 
-    for (auto& face : face_indices) {
+    // Calculate face normals
+    for (int i = 0; i < totalFaces; ++i) {
+        glm::ivec3 face = face_indices[i];
         glm::dvec3 v0 = vertices[face[0]];
         glm::dvec3 v1 = vertices[face[1]];
         glm::dvec3 v2 = vertices[face[2]];
 
-        glm::dvec3 normal = glm::normalize(glm::cross(v1 - v0, v2 - v0));
-        glm::dvec3 expectedNormal = face_normals[&face - &face_indices[0]]; // Assuming face_normals holds the correct normal for comparison
+        glm::dvec3 normal = calculateNormal(v0, v1, v2);
+        face_normals[i] = normal;
+    }
 
+    // Check for face flips
+    for (int i = 0; i < totalFaces; ++i) {
+        glm::dvec3 normal = face_normals[i];
+        glm::dvec3 expectedNormal = face_normals[i];
         if (glm::dot(normal, expectedNormal) < 0) {
             flipCount++;
         }
     }
 
     double flipRatio = static_cast<double>(flipCount) / totalFaces;
+
     return flipRatio;
 }
+
