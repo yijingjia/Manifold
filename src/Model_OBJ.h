@@ -44,6 +44,7 @@ class Model_OBJ
   void Construct_Manifold();
   void Project_Manifold();
   bool Project(glm::dvec3& o, glm::dvec3& d);
+  double detect_flips();
   void Save(const char* filename, bool color);
   void SaveOBJ(const char* filename);
   glm::dvec3 Closest_Point( const glm::dvec3 *triangle, const glm::dvec3 &sourcePosition );
