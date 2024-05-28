@@ -1108,12 +1108,22 @@ double Model_OBJ::detect_flips() {
         face_normals[i] = normal;
     }
 
-    // Check for face flips
+    // Check for face flips by comparing normals of adjacent faces
     for (int i = 0; i < totalFaces; ++i) {
         glm::dvec3 normal = face_normals[i];
-        glm::dvec3 expectedNormal = face_normals[i];
-        if (glm::dot(normal, expectedNormal) < 0) {
-            flipCount++;
+
+        // Loop over adjacent faces
+        for (int j = 0; j < 3; ++j) {
+            int adjacentIndex = face_indices[i][j];
+            if (adjacentIndex < totalFaces) {
+                glm::dvec3 adjacentNormal = face_normals[adjacentIndex];
+
+                // Check if the face normal is flipped compared to its adjacent face normal
+                if (glm::dot(normal, adjacentNormal) < 0) {
+                    flipCount++;
+                    break;
+                }
+            }
         }
     }
 
